@@ -1,0 +1,14 @@
+---
+- name: Copy local rpm file
+  copy:
+    src: '{{ rpm_src }}'
+    dest: '{{ rpm_dest }}'
+  become: yes
+  tags: python-distribution-install
+
+- name: Install python from local rpm file
+  yum:
+    name: '{{ rpm_dest }}'
+    state: present
+  become: yes
+  tags: python-distribution-install

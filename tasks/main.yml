@@ -1,0 +1,10 @@
+---
+- name: Include Python3 Source Installation Tasks
+  include_tasks: 'python3-source-install.yml'
+  when: install_method == 'source'
+  tags: python-source-install
+
+- name: Include Python3 Distribution Installation Tasks
+  include_tasks: 'python3-distribution-install.yml'
+  when: install_method == 'dist'
+  tags: python-distribution-install

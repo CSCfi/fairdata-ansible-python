@@ -1,0 +1,13 @@
+---
+python_executable: python3
+
+# Install method
+install_method: 'source'
+
+# Wanted version (source installation)
+version: '3.6.8'
+minor_version: '3.6'
+
+# Installation from a local rpm (dist installation)
+rpm_src: 'fairdata-python3-1.0.3-20200929.x86_64.rpm'
+rpm_dest: '/tmp/fairdata-python3-1.0.3-20200929.x86_64.rpm'
