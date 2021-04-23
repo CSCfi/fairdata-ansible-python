@@ -74,7 +74,7 @@
         symbol: 'pip3'
       tags: python-source-install
 
-  when: version_result is failed or wanted_version not in version_result.stdout
+  when: "version_result|string == 'failed' or wanted_version|string not in version_result.stdout"
 
 - name: Ensure virtualenv module is installed
   pip:
