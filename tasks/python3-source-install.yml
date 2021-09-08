@@ -16,7 +16,8 @@
         - bzip2-devel
         - libffi-devel
         - sqlite-devel    # Required by codecov
-        state: latest
+        # state: present, in order not to upgrade any package to an untested version
+        state: present
       tags: python-source-install
     
     - name: Remove unwanted Python3 distribution installations
