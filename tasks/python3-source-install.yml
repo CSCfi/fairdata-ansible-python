@@ -6,74 +6,76 @@
   ignore_errors: true
   tags: python-version
 
-block:
-  - name: Ensure packages required by Python3 are installed
-    yum:
-      name:
-      - gcc
-      - openssl-devel
-      - bzip2-devel
-      - libffi-devel
-      - sqlite-devel    # Required by codecov
-      state: latest
-    tags: python-source-install
-  
-  - name: Remove unwanted Python3 distribution installations
-    yum:
-      name:
-      - python3
-      - python3-pip
-      autoremove: yes
-      state: absent
-    tags: python-source-install
-  
-  - name: Download wanted Python3 distribution
-    get_url:
-      url: 'https://www.python.org/ftp/python/{{ wanted_version }}/Python-{{ wanted_version }}.tgz'
-      dest: '/tmp/Python-{{ wanted_version }}.tgz'
-    tags: python-source-install
-  
-  - name: Extract Python3 distribution
-    unarchive:
-      src: '/tmp/Python-{{ wanted_version }}.tgz'
-      remote_src: yes
-      dest: /tmp
-    tags: python-source-install
-  
-  - name: Run Python3 install configuration
-    command:
-      cmd: './configure --enable-optimizations'
-      chdir: '/tmp/Python-{{ wanted_version }}'
-    tags: python-source-install
-  
-  - name: Run Python3 installation
-    command:
-      cmd: 'make altinstall'
-      chdir: '/tmp/Python-{{ wanted_version }}'
-    tags: python-source-install
-  
-  - name: Remove Python3 distribution files
-    file:
-      path: '/tmp/{{ item }}'
-      state: 'absent'
-    with_items:
-    - 'Python-{{ wanted_version }}.tgz'
-    - 'Python-{{ wanted_version }}'
-    tags: python-source-install
-  
-  - name: Ensure Python executables are linked to Python3
-    file:
-      src: '/usr/local/bin/{{ item.executable }}'
-      dest: '/usr/bin/{{ item.symbol }}'
-      state: 'link'
-    with_items:
-    - executable: 'python{{ wanted_minor_version }}'
-      symbol: 'python3'
-    - executable: 'pip{{ wanted_minor_version }}'
-      symbol: 'pip3'
-    tags: python-source-install
+- name: Execute installation of python3
+  block:
+    - name: Ensure packages required by Python3 are installed
+      yum:
+        name:
+        - gcc
+        - openssl-devel
+        - bzip2-devel
+        - libffi-devel
+        - sqlite-devel    # Required by codecov
+        # state: present, in order not to upgrade any package to an untested version
+        state: present
+      tags: python-source-install
+    
+    - name: Remove unwanted Python3 distribution installations
+      yum:
+        name:
+        - python3
+        - python3-pip
+        autoremove: yes
+        state: absent
+      tags: python-source-install
+    
+    - name: Download wanted Python3 distribution
+      get_url:
+        url: 'https://www.python.org/ftp/python/{{ wanted_version }}/Python-{{ wanted_version }}.tgz'
+        dest: '/tmp/Python-{{ wanted_version }}.tgz'
+      tags: python-source-install
+    
+    - name: Extract Python3 distribution
+      unarchive:
+        src: '/tmp/Python-{{ wanted_version }}.tgz'
+        remote_src: yes
+        dest: /tmp
+      tags: python-source-install
+    
+    - name: Run Python3 install configuration
+      command:
+        cmd: './configure --enable-optimizations'
+        chdir: '/tmp/Python-{{ wanted_version }}'
+      tags: python-source-install
+    
+    - name: Run Python3 installation
+      command:
+        cmd: 'make altinstall'
+        chdir: '/tmp/Python-{{ wanted_version }}'
+      tags: python-source-install
+    
+    - name: Remove Python3 distribution files
+      file:
+        path: '/tmp/{{ item }}'
+        state: 'absent'
+      with_items:
+      - 'Python-{{ wanted_version }}.tgz'
+      - 'Python-{{ wanted_version }}'
+      tags: python-source-install
+    
+    - name: Ensure Python executables are linked to Python3
+      file:
+        src: '/usr/local/bin/{{ item.executable }}'
+        dest: '/usr/bin/{{ item.symbol }}'
+        state: 'link'
+      with_items:
+      - executable: 'python{{ wanted_minor_version }}'
+        symbol: 'python3'
+      - executable: 'pip{{ wanted_minor_version }}'
+        symbol: 'pip3'
+      tags: python-source-install
 
-  when: version_result is failed or wanted_version not in version_result.stdout
+  when: "version_result|string == 'failed' or wanted_version|string not in version_result.stdout"
 
 - name: Ensure virtualenv module is installed
   pip:
